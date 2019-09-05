@@ -1,0 +1,50 @@
+---
+title: "ACST886 Assignment2 Q3 5.8"
+author: "Chang Liu"
+date: "04/09/2019"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,warning=FALSE, message=FALSE)
+```
+
+## 5.8
+
+### Processing data
+```{r}
+x<-c(30:49)
+IExpose2risk<-c(70000,66672,68375,65420,61779,66091,68514,69560,65000,66279,67300,65368,65391,62917,66537,62302,62145,63856,61097,61110)
+d_x<-c(39,43,34,31,23,50,48,43,48,47,62,63,84,86,120,121,122,162,151,184)
+q_x<-d_x/IExpose2risk
+```
+
+### obtain function to estimate parameterusing weighted least squares
+From the equation$ln(\frac{\dot{q_x}}{1-\dot{q_x}})=a+bx$
+we can get $\dot{q_x}=\frac{e^{a+bx}}{1+e^{a+bx}}$
+Thus we can find the parameters a and b by minimising:
+$\sum_{x}w_x\left ( \hat{q_x}-\dot{q_x} \right )^2=\sum_{x}w_x\left ( \hat{q_x}-\frac{e^{a+bx}}{1+e^{a+bx}} \right )$
+
+```{r}
+f<-function(p){sum(IExpose2risk*(q_x-(exp(p[1]+p[2]*x)/(1+exp(p[1]+p[2]*x))))^2)}
+```
+
+### obtain initial values by regression
+```{r}
+junk<-glm(q_x~x,family = binomial(link=logit),weights = IExpose2risk)
+iv<-as.numeric(junk$coefficients)
+```
+
+### using nlm function to get a,b using initial values.
+```{r}
+para<-nlm(f,iv)
+a=para$estimate[1]
+b=para$estimate[2]
+a
+b
+```
+### obtain graduate estimates using a and b
+```{r}
+q_grad<-exp(a+b*x)/(1+exp(a+b*x))
+q_grad
+```

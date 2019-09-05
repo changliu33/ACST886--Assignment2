@@ -1,0 +1,101 @@
+---
+title: "ACST886 Assignment2 Q2"
+author: "Chang Liu"
+date: "04/09/2019"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data processing 
+
+```{r}
+Exposed2risk<-c(15518,19428,21594,21890,19174,15775,11414,6993,3276,1069,201)
+deaths<-c(65,144,219,378,465,557,685,644,471,217,67)
+Expec_death<-c(73.9,134.6,223.9,346.3,468.1,600.1,675.5,637.4,458.7,240.6,62.4)
+```
+
+## Claculate crude estimates and graduated estimates using binomial model 
+
+
+```{r}
+q_hat<-deaths/Exposed2risk
+q_grad<-Expec_death/Exposed2risk
+```
+
+## Claculate standerised deviation
+```{r}
+z_x<-(deaths-Exposed2risk*q_grad)/sqrt(Exposed2risk*q_grad*(1-q_grad))
+z_x
+hist(z_x)
+```
+From the histgram of z_x we konw there are 3 of them fall in (-2,-1), 2 fall in (-1,0),5 fall in (0,1),1 fall in (1,2).
+## Chi-square test
+
+```{r}
+test_stats1<-sum(z_x^2)
+if(test_stats1>qchisq(0.95,length(z_x-1))){print("we reject null hypothesis that at 5% significance level z_x is approximatly normal,thus the adherence to data is poor")}else{
+  print("we do not reject null hypothesis that at 5% significance level z_x is approximatly normal,thus the adherence to data is not poor")}
+```
+
+## Standerised deviations test
+```{r}
+A<-c(3,2,5,1)
+E<-length(deaths)*c(0.16,0.34,0.34,0.16)
+test_stats2<-sum((A-E)^2/E)
+if(test_stats2>qchisq(0.95,length(z_x-1))){print("we reject null hypothesis that at 5% significance level z_x is approximatly normal,thus the adherence to data is poor")}else{
+  print("we do not reject null hypothesis that at 5% significance level z_x is approximatly normal,thus the adherence to data is not poor")}
+```
+## Cumulative deviations test
+```{r}
+test_stats3<-sum(deaths-Exposed2risk*q_grad)/sqrt(sum(Exposed2risk*q_grad*(1-q_grad)))
+if(test_stats3>1.96){print("we reject null hypothesis that at 5% significance level z_x is approximatly normal,thus the adherence to data is poor")}else{
+  print("we do not reject null hypothesis that at 5% significance level z_x is approximatly normal,thus the adherence to data is not poor")}
+```
+
+## Sign test
+From the histgram of z_x we konw there are 6 positive values.
+```{r}
+m<-length(deaths)
+f<-function(a){choose(m,a)*0.5^m}
+temp<-f(0)
+for (i in 1:m) {
+ if(temp<0.025){
+   temp<-temp+f(i)
+    }else{break("")}
+  
+}
+k<-i
+if(k<5){print("we reject null hypothesis that at 5% significance level z_x is approximatly normal,thus the adherence to data is poor")}else{
+  print("we do not reject null hypothesis that at 5% significance level z_x is approximatly normal,thus the adherence to data is not poor")}
+
+```
+
+## Grouping of sign test
+```{r}
+n_1<-6
+n_2<-5
+g<-function(a){choose(n_1-1,a-1)*choose(n_2+1,a)/choose(n_1+n_2,n_1)}
+temp<-g(1)
+for (i in 2:m) {
+ if(temp<0.05){
+   temp<-temp+g(i)
+    }else{break("")}
+  
+}
+k<-i
+if(k>6){print("we reject null hypothesis that at 5% significance level z_x is approximatly normal,thus the adherence to data is poor")}else{
+  print("we do not reject null hypothesis that at 5% significance level z_x is approximatly normal,thus the adherence to data is not poor")}
+
+```
+
+Serial Correlations TEST
+```{r}
+z1_bar<-sum(z_x[1:10])/(m-1)
+z2_bar<-sum(z_x[2:11])/(m-1)
+test_stats4<-(sum((z_x[1:10]-z1_bar)*(z_x[2:11]-z2_bar))/sqrt(sum((z_x[1:10]-z1_bar)^2)*sum((z_x[2:11]-z2_bar)^2)))*sqrt(m-1)
+if(test_stats4>1.64){print("we reject null hypothesis that at 5% significance level z_x is approximatly normal,thus the adherence to data is poor")}else{
+  print("we do not reject null hypothesis that at 5% significance level z_x is approximatly normal,thus the adherence to data is not poor")}
+```

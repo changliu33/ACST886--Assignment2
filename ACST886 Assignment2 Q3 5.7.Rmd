@@ -1,0 +1,45 @@
+---
+title: "ACST886 Assignment2 Q3 5.7"
+author: "Chang Liu"
+date: "04/09/2019"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,warning=FALSE, message=FALSE)
+```
+
+## 5.7
+
+### Processing data
+```{r}
+x<-c(70:75)
+CExpose2risk<-c(1000,1005,1010,1008,1006,998)
+d_x<-c(80,90,95,105,115,125)
+mu<-d_x/CExpose2risk
+```
+
+### obtaion parameters of Gompertz' Law using MLE
+```{r}
+f<- function(p){sum(CExpose2risk*p[1]*p[2]^x)-sum(d_x*log(CExpose2risk*p[1]*p[2]^x))}
+  
+```
+### obtain initial values using linear regression
+```{r}
+junk<-lm(log(mu)~(x))
+iv<-exp(as.numeric(junk$coefficients))
+```
+
+### obtain B and C using nlm function
+```{r}
+para<-nlm(f,iv)
+B<-para$estimate[1]
+c<-para$estimate[2]
+B
+c
+```
+### obtain graduate estimates using B and c
+```{r}
+mu_grad<-B*c^(x)
+mu_grad
+```
